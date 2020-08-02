@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet,Button, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
+import React, { useState,useEffect } from 'react';
+import { View, Text, StyleSheet, Button, TouchableWithoutFeedback, Keyboard, Alert, Dimensions, ScrollView, KeyboardAvoidingView } from 'react-native';
 import Card from '../components/Card';
 import Colors from '../constants/colors';
 import Input from '../components/Input';
@@ -9,10 +9,23 @@ import TitleText from '../components/TitleText';
 import MainButton from '../components/MainButton';
 
 const StartGameScreen = props => {
-    const [enteredValue,setEnteredValue] = useState('');
-    const [confirmed,setConfirmed] = useState(false);
-    const [selectedNumber,setSelectedNumber] = useState();
-
+    const [enteredValue, setEnteredValue] = useState('');
+    const [confirmed, setConfirmed] = useState(false);
+    const [selectedNumber, setSelectedNumber] = useState();
+    const [ buttonWidth, setButtonWidth ] = useState( Dimensions.get('window').width /4)
+    
+    useEffect(()=>{
+        const updateLayout = () => {
+            setButtonWidth(Dimensions.get('window').width/4);
+        }
+    
+        Dimensions.addEventListener('change',updateLayout);
+    
+        return()=>{
+            Dimensions.removeEventListener('change',updateLayout);
+        }
+    })
+    
     const numberInputHandler = inputText => {
         setEnteredValue(inputText.replace(/[^0-9]/g, ''))
     }
@@ -24,99 +37,108 @@ const StartGameScreen = props => {
 
     const confirmInputHandler = () => {
         const chosenNumber = parseInt(enteredValue);
-        if(isNaN(chosenNumber) || chosenNumber <=0 || chosenNumber > 99){
-            Alert.alert('Invalid number!','Number has to be a number between 1 and 99.',[{text: 'Okay',style:'destructive', onPress: resetInputHandler}])
+        if (isNaN(chosenNumber) || chosenNumber <= 0 || chosenNumber > 99) {
+            Alert.alert('Invalid number!', 'Number has to be a number between 1 and 99.', [{ text: 'Okay', style: 'destructive', onPress: resetInputHandler }])
             return;
         }
         setConfirmed(true);
-        setSelectedNumber(parseInt(enteredValue,10));
+        setSelectedNumber(parseInt(enteredValue, 10));
         setEnteredValue('');
         Keyboard.dismiss();
     }
     let confirmedOutput;
 
-    if(confirmed) {
-        confirmedOutput = 
+    if (confirmed) {
+        confirmedOutput =
             <Card style={styles.summaryContainer}>
                 <BodyText>You selected</BodyText>
                 <NumberContainer>{selectedNumber}</NumberContainer>
                 {/* <Button title="START GAME" onPress={()=>props.onStartGame(selectedNumber)}/> */}
-                <MainButton onPress={()=>props.onStartGame(selectedNumber)}>
+                <MainButton onPress={() => props.onStartGame(selectedNumber)}>
                     START GAME
                 </MainButton>
             </Card>
     }
-    return(
-        <TouchableWithoutFeedback onPress={()=>{
-            Keyboard.dismiss();
-        }}>
-            <View style={styles.screen}>
-                <TitleText style={styles.title}>Start a New Game</TitleText>
-                    <Card style={styles.inputContainer} >
+    return (
+        <ScrollView>
+            <KeyboardAvoidingView behaviour='position' keyboardVerticalOffset={30}>
+                <TouchableWithoutFeedback onPress={() => {
+                    Keyboard.dismiss();
+                }}>
+                    <View style={styles.screen}>
+                        <TitleText style={styles.title}>Start a New Game</TitleText>
+                        <Card style={styles.inputContainer} >
                             <BodyText>Select a Number</BodyText>
-                            <Input 
-                                style={styles.input} 
-                                blurOnSubmit 
-                                autoCapitalize='none' 
-                                autoCorrect={false} 
-                                keyboardType="number-pad" 
+                            <Input
+                                style={styles.input}
+                                blurOnSubmit
+                                autoCapitalize='none'
+                                autoCorrect={false}
+                                keyboardType="number-pad"
                                 maxLength={2}
                                 onChangeText={numberInputHandler}
                                 value={enteredValue}
                             />
                             <View style={styles.buttonsContainer} >
-                                <View style={styles.buttons} >
-                                    <Button title="RESET" 
+                                <View style={{...styles.buttons},{width:buttonWidth}} >
+                                    <Button title="RESET"
                                         color={Colors.accent}
                                         onPress={resetInputHandler}
                                     />
                                 </View>
-                                <View style={styles.buttons} >
+                                <View style={{...styles.buttons},{width: buttonWidth}} >
                                     <Button title="CONFIRM"
                                         color={Colors.primary}
                                         onPress={confirmInputHandler}
                                     />
                                 </View>
                             </View>
-                    </Card>
-                    {confirmedOutput}
-            </View>
-        </TouchableWithoutFeedback>
-        
+                        </Card>
+                        {confirmedOutput}
+                    </View>
+                </TouchableWithoutFeedback>
+
+            </KeyboardAvoidingView>
+            
+        </ScrollView>
     )
 };
 
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
-        padding:10,
-        alignItems:'center'
+        padding: 10,
+        alignItems: 'center'
     },
-    title:{
-        fontSize:20,
+    title: {
+        fontSize: 20,
         marginVertical: 10
     },
     input: {
         width: 90,
-        textAlign:'center'
+        textAlign: 'center'
     },
-    inputContainer:{
-        width:300,
-        maxWidth:'80%',
-        alignItems:'center',
+    inputContainer: {
+        width: '80%',
+        maxWidth: '95%',
+        minWidth: 300,
+        alignItems: 'center',
     },
     buttonsContainer: {
         flexDirection: 'row',
         width: '100%',
-        justifyContent:'space-between',
-        paddingHorizontal:15
+        justifyContent: 'space-between',
+        paddingHorizontal: 15
     },
     buttons: {
-        width:'40%'
+        // width: '40%'
+        // This is just calculated only once
+        // width: Dimensions.get('window').width /4
+        // width: buttonWidth
     },
     summaryContainer: {
         marginTop: 20,
-        alignItems:'center'
+        alignItems: 'center'
     }
 });
 

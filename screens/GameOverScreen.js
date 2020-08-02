@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Text, Button, Image} from 'react-native';
+import { View, StyleSheet, Text, Button, Image, Dimensions, ScrollView} from 'react-native';
 import TitleText from '../components/TitleText';
 import BodyText from '../components/BodyText';
 import Colors from '../constants/colors';
@@ -7,6 +7,7 @@ import MainButton from '../components/MainButton';
 
 const GameOverScreen = props => {
     return(
+    <ScrollView>
         <View style={styles.screen} >
             <TitleText>The Game is Over!</TitleText>
             <View style={styles.imageContainer} >
@@ -39,6 +40,7 @@ const GameOverScreen = props => {
 
             </View>
         </View>
+    </ScrollView>
     )
 
 };
@@ -47,17 +49,18 @@ const styles = StyleSheet.create({
     screen: {
         flex: 1,
         justifyContent:'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        paddingVertical: 10
     },
     button:{
         marginVertical: 10
     },
     imageContainer: {
-        borderRadius: 150,
+        borderRadius: Dimensions.get('window').width*0.35,
         borderWidth: 3,
         borderColor: 'black',
-        height: 300,
-        width: 300,
+        height: Dimensions.get('window').width*0.7,
+        width: Dimensions.get('window').width*0.7,
         overflow:'hidden',
         marginVertical: 30
     },  
